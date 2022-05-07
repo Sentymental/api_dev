@@ -36,10 +36,9 @@ def find_post(post_id: int):
 
 def find_index_post(post_id: int):
     """Find corresponding index"""
-    for index, post in enumerate(my_posts):
+    for i, post in enumerate(my_posts):
         if post["id"] == post_id:
-            return index
-        return None
+            return i
 
 
 # Path Operations:
@@ -86,3 +85,18 @@ def delete_post(post_id: int):
         )
     my_posts.pop(index)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.put("/posts/{post_id}")
+def update_post(post_id: int, post: Post):
+    """Update post"""
+    index = find_index_post(post_id)
+    print(index)
+    if not index:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Post not found!"
+        )
+    post_dict = post.dict()
+    post_dict["id"] = post_id
+    my_posts[index] = post_dict
+    return {"data": post_dict}
