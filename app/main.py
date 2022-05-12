@@ -6,7 +6,6 @@ from random import randrange
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Response, status
 from pydantic import BaseModel
-from sqlalchemy import create_engine
 
 
 app = FastAPI()
