@@ -63,9 +63,9 @@ async def root():
     return {"message": "Hello World"}  # JSON
 
 
-# @app.get("/test")
-# async def test_posts(db: Session = Depends(get_db)):
-#     return {"message": "Hello DB"}
+@app.get("/test")
+async def test_posts(db: Session = Depends(get_db)):
+    return {"message": "Hello DB"}
 
 
 @app.get("/posts/{post_id}")  # Path parameter
