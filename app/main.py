@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from database import engine, SessionLocal
+from database import engine, get_db
 from models import Post
 
 
@@ -15,15 +15,6 @@ app = FastAPI()
 
 # Create our database Table
 Post.metadata.create_all(bind=engine)
-
-# Dependency:
-def get_db():
-    """Dependency for database connection"""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 class Post(BaseModel):
