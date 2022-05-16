@@ -2,8 +2,7 @@
 # pylint: disable=no-name-in-module
 # pylint: disable=no-self-argument
 
-from random import randrange
-from typing import Optional
+from multiprocessing import synchronize
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -23,7 +22,6 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
 
 
 # Path Operations:
@@ -64,16 +62,17 @@ def create_posts(post: Post, db_session: Session = Depends(get_db)):
     return post
 
 
-# @app.delete("/posts/{post_id}")
-# def delete_post(post_id: int):
-#     """Delete a post"""
-#     index = find_index_post(post_id)
-#     if not index:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found!"
-#         )
-#     my_posts.pop(index)
-#     return Response(status_code=status.HTTP_204_NO_CONTENT)
+@app.delete("/posts/{post_id}")
+def delete_post(post_id: int, db_session: Session = Depends(get_db)):
+    """Delete a post"""
+    post = db_session.query(models.Post).filter(models.Post.id == post_id)
+    if post.first() is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Post not found!"
+        )
+    post.delete()
+    db_session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 # @app.put("/posts/{post_id}")
