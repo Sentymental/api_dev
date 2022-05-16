@@ -67,19 +67,20 @@ def get_post(post_id: int):
 
 
 @app.get("/posts")
-def get_posts(db: Session = Depends(get_db)):
+def get_posts(db_session: Session = Depends(get_db)):
     """GET method endpoint that points to our posts"""
-    posts = db.query(models.Post).all()
+    posts = db_session.query(models.Post).all()
     return posts
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_posts(post: Post):
+def create_posts(post: Post, db_session: Session = Depends(get_db)):
     """POST method endpoint that creates our posts"""
-    post_dict = post.dict()
-    post_dict["id"] = randrange(0, 100_000)
-    my_posts.append(post_dict)
-    return {"data": post_dict}
+    post = models.Post(**post.dict())
+    db_session.add(post)
+    db_session.commit()
+    db_session.refresh(post)
+    return post
 
 
 @app.delete("/posts/{post_id}")
