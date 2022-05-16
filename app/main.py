@@ -54,12 +54,6 @@ async def root():
     return {"message": "Hello World"}  # JSON
 
 
-@app.get("/test")
-async def test_posts(db: Session = Depends(get_db)):
-    posts = db.query(models.Post).all()
-    return {"data": posts}
-
-
 @app.get("/posts/{post_id}")  # Path parameter
 def get_post(post_id: int):
     """GET method endpoint that points to provided post ID"""
@@ -73,9 +67,10 @@ def get_post(post_id: int):
 
 
 @app.get("/posts")
-def get_posts():
+def get_posts(db: Session = Depends(get_db)):
     """GET method endpoint that points to our posts"""
-    return {"data": my_posts}
+    posts = db.query(models.Post).all()
+    return posts
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
