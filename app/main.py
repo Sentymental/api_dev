@@ -2,7 +2,6 @@
 # pylint: disable=no-name-in-module
 # pylint: disable=no-self-argument
 
-from multiprocessing import synchronize
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -40,6 +39,7 @@ def get_post(post_id: int, db_session: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found!"
         )
+        
     return post
 
 
@@ -70,20 +70,21 @@ def delete_post(post_id: int, db_session: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found!"
         )
+
     post.delete()
     db_session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# @app.put("/posts/{post_id}")
-# def update_post(post_id: int, post: Post):
-#     """Update post"""
-#     index = find_index_post(post_id)
-#     if not index:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND, detail="Post not found!"
-#         )
-#     post_dict = post.dict()
-#     post_dict["id"] = post_id
-#     my_posts[index] = post_dict
-#     return {"data": post_dict}
+@app.put("/posts/{post_id}")
+def update_post(post_id: int, post: Post, db_session: Session = Depends(get_db)):
+    """Update post"""
+    post_query = db_session.query(models.Post).filter(models.Post.id == post_id)
+    if post_query.first() is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Post not found!"
+        )
+
+    post_query.update(post.dict())
+    db_session.commit()
+    return {"data": post_query.first()}
