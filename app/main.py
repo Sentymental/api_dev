@@ -8,13 +8,13 @@ from fastapi import Depends, FastAPI, HTTPException, Response, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database import engine, get_db
-from models import Post
+import models
 
 
 app = FastAPI()
 
 # Create our database Table
-Post.metadata.create_all(bind=engine)
+models.Post.metadata.create_all(bind=engine)
 
 
 class Post(BaseModel):
@@ -56,7 +56,8 @@ async def root():
 
 @app.get("/test")
 async def test_posts(db: Session = Depends(get_db)):
-    return {"message": "Hello DB"}
+    posts = db.query(models.Post).all()
+    return {"data": posts}
 
 
 @app.get("/posts/{post_id}")  # Path parameter
