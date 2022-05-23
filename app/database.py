@@ -19,11 +19,12 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+
 # Dependency:
 def get_db():
     """Dependency for database connection"""
-    db = SessionLocal()
+    db_session = SessionLocal()
     try:
-        yield db
+        yield db_session
     finally:
-        db.close()
+        db_session.close()
