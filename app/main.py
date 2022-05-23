@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from database import engine, get_db
 
 # from schemas import CreatePost, UpdatePost # change when we add folder for that
-import schemas
-import models
+import models, schemas
+
 
 
 app = FastAPI()
@@ -25,7 +25,7 @@ async def root():
 
 
 # Get Single Post Endpoint:
-@app.get("/posts/{post_id}")  # Path parameter
+@app.get("/posts/{post_id}", response_model=schemas.Post)
 def get_post(post_id: int, db_session: Session = Depends(get_db)):
     """GET method endpoint that points to provided post ID"""
     post = (
@@ -39,7 +39,7 @@ def get_post(post_id: int, db_session: Session = Depends(get_db)):
 
 
 # Get All Posts Endpoint:
-@app.get("/posts")
+@app.get("/posts", response_model=list[schemas.Post])
 def get_posts(db_session: Session = Depends(get_db)):
     """GET method endpoint that points to our posts"""
     posts = db_session.query(models.Post).all()
@@ -47,7 +47,11 @@ def get_posts(db_session: Session = Depends(get_db)):
 
 
 # Post Creation Endpoint:
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/posts",
+    status_code=status.HTTP_201_CREATED,
+    response_model=schemas.Post,
+)
 def create_posts(
     post: schemas.CreatePost, db_session: Session = Depends(get_db)
 ):
@@ -59,6 +63,7 @@ def create_posts(
     return post
 
 
+# Post Deletion Endpoint:
 @app.delete("/posts/{post_id}")
 def delete_post(post_id: int, db_session: Session = Depends(get_db)):
     """Delete a post"""
@@ -73,7 +78,8 @@ def delete_post(post_id: int, db_session: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@app.put("/posts/{post_id}")
+# Post Update Endpoint:
+@app.put("/posts/{post_id}", response_model=schemas.Post)
 def update_post(
     post_id: int,
     post: schemas.UpdatePost,
@@ -90,4 +96,4 @@ def update_post(
 
     post_query.update(post.dict())
     db_session.commit()
-    return {"data": post_query.first()}
+    return post_query.first()
