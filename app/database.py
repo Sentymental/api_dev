@@ -9,11 +9,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import Session
+from passwords import DB_URL
 
 # Engine:
-SQLALCHEMY_DATABASE_URL = (
-    "postgresql+psycopg2://postgres:lukas14@127.0.0.1:5433/fastapi"
-)
+SQLALCHEMY_DATABASE_URL = DB_URL
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

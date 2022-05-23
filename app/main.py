@@ -4,14 +4,16 @@
 
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
 from database import engine, get_db
-
-# from schemas import CreatePost, UpdatePost # change when we add folder for that
 import models, schemas
 
 
-
+# FastApi:
 app = FastAPI()
+
+# BCrypt:
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Create our database Table
 models.Post.metadata.create_all(bind=engine)
@@ -97,3 +99,36 @@ def update_post(
     post_query.update(post.dict())
     db_session.commit()
     return post_query.first()
+
+
+# Users Endpoints:
+
+# Get All Posts Endpoint:
+@app.get("/users", response_model=list[schemas.User])
+def get_users(db_session: Session = Depends(get_db)):
+    """GET method endpoint that points to our posts"""
+
+    users = db_session.query(models.User).all()
+    return users
+
+
+# Create User Endpoint:
+@app.post(
+    "/users",
+    status_code=status.HTTP_201_CREATED,
+    response_model=schemas.UserOutput,
+)
+async def create_user(
+    user: schemas.UserCreate, db_session: Session = Depends(get_db)
+):
+    """POST method endpoint that creates our users"""
+
+    hashed_password = pwd_context.hash(user.password)
+    user.password = hashed_password
+
+    user = models.User(**user.dict())
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    return user
