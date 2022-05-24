@@ -4,16 +4,14 @@
 
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 from database import engine, get_db
-import models, schemas
-
+import models
+import schemas
+import utils
 
 # FastApi:
 app = FastAPI()
 
-# BCrypt:
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Create our database Table
 models.Post.metadata.create_all(bind=engine)
@@ -103,10 +101,26 @@ def update_post(
 
 # Users Endpoints:
 
-# Get All Posts Endpoint:
-@app.get("/users", response_model=list[schemas.User])
-def get_users(db_session: Session = Depends(get_db)):
-    """GET method endpoint that points to our posts"""
+# Get User by ID:
+@app.get("/users/{user_id}", response_model=schemas.UserOutput)
+async def get_user(user_id: int, db_session: Session = Depends(get_db)):
+    """GET method endpoint that points to our user by ID"""
+    user = (
+        db_session.query(models.User).filter(models.User.id == user_id).first()
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"UserID: {user_id} not found!",
+        )
+    return user
+
+
+# Get All Users Endpoint:
+@app.get("/users", response_model=list[schemas.UserOutput])
+async def get_users(db_session: Session = Depends(get_db)):
+    """GET method endpoint that points to our users"""
 
     users = db_session.query(models.User).all()
     return users
@@ -123,7 +137,7 @@ async def create_user(
 ):
     """POST method endpoint that creates our users"""
 
-    hashed_password = pwd_context.hash(user.password)
+    hashed_password = utils.hash(user.password)
     user.password = hashed_password
 
     user = models.User(**user.dict())
