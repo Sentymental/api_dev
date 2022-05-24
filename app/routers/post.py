@@ -13,7 +13,7 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 # Get Single Post Endpoint:
 @router.get("/{post_id}", response_model=schemas.Post)
-def get_post(post_id: int, db_session: Session = Depends(get_db)):
+async def get_post(post_id: int, db_session: Session = Depends(get_db)):
     """GET method endpoint that points to provided post ID"""
     post = (
         db_session.query(models.Post).filter(models.Post.id == post_id).first()
@@ -27,7 +27,7 @@ def get_post(post_id: int, db_session: Session = Depends(get_db)):
 
 # Get All Posts Endpoint:
 @router.get("/", response_model=list[schemas.Post])
-def get_posts(db_session: Session = Depends(get_db)):
+async def get_posts(db_session: Session = Depends(get_db)):
     """GET method endpoint that points to our posts"""
     posts = db_session.query(models.Post).all()
     return posts
@@ -39,7 +39,7 @@ def get_posts(db_session: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.Post,
 )
-def create_posts(
+async def create_posts(
     post: schemas.CreatePost, db_session: Session = Depends(get_db)
 ):
     """POST method endpoint that creates our posts"""
@@ -52,7 +52,7 @@ def create_posts(
 
 # Post Deletion Endpoint:
 @router.delete("/{post_id}")
-def delete_post(post_id: int, db_session: Session = Depends(get_db)):
+async def delete_post(post_id: int, db_session: Session = Depends(get_db)):
     """Delete a post"""
     post = db_session.query(models.Post).filter(models.Post.id == post_id)
     if post.first() is None:
@@ -67,7 +67,7 @@ def delete_post(post_id: int, db_session: Session = Depends(get_db)):
 
 # Post Update Endpoint:
 @router.put("/{post_id}", response_model=schemas.Post)
-def update_post(
+async def update_post(
     post_id: int,
     post: schemas.UpdatePost,
     db_session: Session = Depends(get_db),

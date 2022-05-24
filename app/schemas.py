@@ -92,3 +92,10 @@ class User(UserBase):
 
     id: int
     created_at: datetime
+
+
+class UserLogin(BaseModel):
+    """Class that will be responsible for our login model"""
+
+    email: EmailStr
+    password: str

@@ -4,7 +4,7 @@
 
 from fastapi import FastAPI
 from database import engine
-from routers import post, user
+from routers import post, user, auth
 import models
 
 # FastApi:
@@ -18,6 +18,9 @@ app.include_router(post.router)
 
 # Users Endpoints:
 app.include_router(user.router)
+
+# Auth Endpoints:
+app.include_router(auth.router)
 
 
 # Path Operations:

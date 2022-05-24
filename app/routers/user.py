@@ -48,7 +48,7 @@ async def create_user(
 ):
     """POST method endpoint that creates our users"""
 
-    hashed_password = utils.hash(user.password)
+    hashed_password = utils.hash_pw(user.password)
     user.password = hashed_password
 
     user = models.User(**user.dict())
