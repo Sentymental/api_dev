@@ -99,3 +99,16 @@ class UserLogin(BaseModel):
 
     email: EmailStr
     password: str
+
+
+class Token(BaseModel):
+    """Class that will be responsible for our token validation"""
+
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    """Class that will be responsible for our token data validation"""
+
+    id: str | None = None
